@@ -22,7 +22,11 @@ export function useMovies() {
       } catch (e) {}
     }
 
-    fetch("/api/movies")
+    const API_URL = import.meta.env.PROD
+      ? "https://zip-courtroom-dragonwarrior.vercel.app/api/movies"
+      : "/api/movies";
+
+    fetch(API_URL)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
