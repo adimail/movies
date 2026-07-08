@@ -13,13 +13,14 @@ export function MovieGridView({ movies }: MovieGridViewProps) {
     <div style={{ padding: isMobile ? "5rem 1rem 2rem 1rem" : "5rem 2rem 2rem 2rem", height: "100%", overflowY: "auto" }}>
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-        gap: isMobile ? "1rem" : "2rem"
+        gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(auto-fill, minmax(200px, 1fr))",
+        gap: isMobile ? "0.75rem" : "2rem"
       }}>
         {movies.map((movie) => {
           const isBookmarked = bookmarkedMovieIds.includes(movie.id);
           return (
             <div
+              id={`movie-card-${movie.id}`}
               key={movie.id}
               onClick={() => setSelectedMovieId(movie.id)}
               style={{
@@ -32,7 +33,7 @@ export function MovieGridView({ movies }: MovieGridViewProps) {
                 position: "relative"
               }}
               onMouseEnter={(e) => {
-                if (!isMobile) e.currentTarget.style.transform = "scale(1.01)";
+                if (!isMobile) e.currentTarget.style.transform = "scale(1.05)";
               }}
               onMouseLeave={(e) => {
                 if (!isMobile) e.currentTarget.style.transform = "scale(1)";
@@ -62,13 +63,13 @@ export function MovieGridView({ movies }: MovieGridViewProps) {
                     backdropFilter: "blur(4px)"
                   }}
                 >
-                  <Bookmark size={16} fill={isBookmarked ? "#d7a050" : "none"} />
+                  <Bookmark size={isMobile ? 14 : 16} fill={isBookmarked ? "#d7a050" : "none"} />
                 </button>
               </div>
-              <div style={{ padding: "1rem" }}>
+              <div style={{ padding: isMobile ? "0.75rem" : "1rem" }}>
                 <div style={{
                   fontFamily: "monospace",
-                  fontSize: "0.85rem",
+                  fontSize: isMobile ? "0.75rem" : "0.85rem",
                   color: "#fff",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -79,8 +80,8 @@ export function MovieGridView({ movies }: MovieGridViewProps) {
                 </div>
                 {movie.favorite && (
                   <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", color: "#f59e0b" }}>
-                    <Star size={12} fill="#f59e0b" />
-                    <span style={{ fontFamily: "monospace", fontSize: "0.6rem", textTransform: "uppercase" }}>
+                    <Star size={isMobile ? 10 : 12} fill="#f59e0b" />
+                    <span style={{ fontFamily: "monospace", fontSize: isMobile ? "0.55rem" : "0.6rem", textTransform: "uppercase" }}>
                       Favorite
                     </span>
                   </div>
