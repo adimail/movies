@@ -33,7 +33,8 @@ export function generateSpatialData(movies: Movie[]): SpatialMovie[] {
 
 export function rankMoviesByDirection(
   movies: SpatialMovie[],
-  cursorNDC: { x: number; y: number }
+  cursorNDC: { x: number; y: number },
+  selectedGenres: string[] = []
 ): SpatialMovie[] {
   const dirX = cursorNDC.x;
   const dirY = cursorNDC.y;
@@ -46,7 +47,17 @@ export function rankMoviesByDirection(
     const dot = (m.x / mMag) * normDirX + (m.y / mMag) * normDirY;
 
     const coneWeight = dot > 0.2 ? 1 : Math.max(0, dot + 1);
-    const score = coneWeight * (1 + mMag * 0.05) + seededRandom(m.x * m.y) * 0.5;
+
+    let relevance = 1;
+    if (selectedGenres.length > 0) {
+      const sum = selectedGenres.reduce((acc, key) => {
+        const idx = SCORE_KEYS.indexOf(key as any);
+        return acc + (idx !== -1 ? m.scores[idx] : 0);
+      }, 0);
+      relevance = 1 + (sum / selectedGenres.length);
+    }
+
+    const score = (coneWeight * (1 + mMag * 0.05) + seededRandom(m.x * m.y) * 0.5) * relevance;
 
     return { movie: m, score };
   });

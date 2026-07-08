@@ -91,11 +91,15 @@ export function SearchBar({ allMovies, filteredMovies }: SearchBarProps) {
     inputRef.current?.blur();
 
     if (viewMode === "grid") {
-      setSelectedMovieId(movie.id);
       setTimeout(() => {
         const el = document.getElementById(`movie-card-${movie.id}`);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            setSelectedMovieId(movie.id);
+          }, 600);
+        } else {
+          setSelectedMovieId(movie.id);
         }
       }, 100);
     } else {

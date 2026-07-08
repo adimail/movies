@@ -112,7 +112,7 @@ export function useInfiniteSpawner(
       }
     }
 
-    const ranked = rankMoviesByDirection(allMovies, cursor);
+    const ranked = rankMoviesByDirection(allMovies, cursor, s.selectedGenres);
     const safeDirZ = camDir.z === 0 ? -1 : camDir.z;
     const cardScale = s.cardScale;
 
@@ -198,4 +198,3 @@ export function useInfiniteSpawner(
     state.setVisibleMovies(visibleMovies);
   });
 }
-

@@ -61,7 +61,7 @@ export function MoviesCanvas() {
 
   const filteredMovies = useMemo(() => {
     const { selectedGenres, favoritesOnly } = settings;
-    return spatialMovies.filter((m) => {
+    const filtered = spatialMovies.filter((m) => {
       if (favoritesOnly && !m.favorite) return false;
 
       if (selectedGenres.length > 0) {
@@ -73,6 +73,22 @@ export function MoviesCanvas() {
       }
       return true;
     });
+
+    if (selectedGenres.length > 0) {
+      filtered.sort((a, b) => {
+        const scoreA = selectedGenres.reduce((acc, key) => {
+          const idx = SCORE_KEYS.indexOf(key as (typeof SCORE_KEYS)[number]);
+          return acc + (idx !== -1 ? a.scores[idx] : 0);
+        }, 0);
+        const scoreB = selectedGenres.reduce((acc, key) => {
+          const idx = SCORE_KEYS.indexOf(key as (typeof SCORE_KEYS)[number]);
+          return acc + (idx !== -1 ? b.scores[idx] : 0);
+        }, 0);
+        return scoreB - scoreA;
+      });
+    }
+
+    return filtered;
   }, [spatialMovies, settings]);
 
   const activeFilterCount = useMemo(() => {
@@ -432,7 +448,7 @@ export function MoviesCanvas() {
             color: "#fff",
             cursor: "pointer",
             transition: "all 0.2s ease",
-          }}
+        }}
         >
           {isHelpOpen ? <X size={18} /> : <HelpCircle size={18} />}
         </button>
