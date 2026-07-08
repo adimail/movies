@@ -27,6 +27,7 @@ interface MovieStore {
   isBookmarkDrawerOpen: boolean;
   isMobile: boolean;
   hasSeenTutorial: boolean;
+  hasSeenGridTutorial: boolean;
   waveCounterReset: number;
   settings: Settings;
   jumpTargetMovieId: string | null;
@@ -51,6 +52,7 @@ interface MovieStore {
   setBookmarkDrawerOpen: (open: boolean) => void;
   setIsMobile: (mobile: boolean) => void;
   setHasSeenTutorial: (seen: boolean) => void;
+  setHasSeenGridTutorial: (seen: boolean) => void;
   setJumpTargetMovieId: (id: string | null, openDetails?: boolean) => void;
   setVisibleMovies: (movies: import("./types").SpatialMovie[]) => void;
   setEndOfUniverseZ: (z: number | null) => void;
@@ -89,6 +91,7 @@ export const useMovieStore = create<MovieStore>()(
       isBookmarkDrawerOpen: false,
       isMobile: false,
       hasSeenTutorial: false,
+      hasSeenGridTutorial: false,
       waveCounterReset: 0,
       settings: defaultSettings,
       jumpTargetMovieId: null,
@@ -120,6 +123,7 @@ export const useMovieStore = create<MovieStore>()(
       setBookmarkDrawerOpen: (open) => set({ isBookmarkDrawerOpen: open }),
       setIsMobile: (mobile) => set({ isMobile: mobile }),
       setHasSeenTutorial: (seen) => set({ hasSeenTutorial: seen }),
+      setHasSeenGridTutorial: (seen) => set({ hasSeenGridTutorial: seen }),
       setJumpTargetMovieId: (id, openDetails = true) =>
         set({ jumpTargetMovieId: id, openDetailsOnJump: openDetails }),
       setVisibleMovies: (movies) => set({ visibleMovies: movies }),
@@ -150,8 +154,10 @@ export const useMovieStore = create<MovieStore>()(
         viewMode: state.viewMode,
         settings: state.settings,
         hasSeenTutorial: state.hasSeenTutorial,
+        hasSeenGridTutorial: state.hasSeenGridTutorial,
         bookmarkedMovieIds: state.bookmarkedMovieIds,
       }),
     }
   )
 );
+

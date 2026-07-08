@@ -43,6 +43,8 @@ export function MoviesCanvas() {
     settings,
     hasSeenTutorial,
     setHasSeenTutorial,
+    hasSeenGridTutorial,
+    setHasSeenGridTutorial,
     setHoveredMovieClientPos,
     setJumpTargetMovieId,
   } = useMovieStore();
@@ -379,7 +381,10 @@ export function MoviesCanvas() {
       <SearchBar allMovies={spatialMovies} filteredMovies={filteredMovies} />
 
       <button
-        onClick={() => setViewMode(viewMode === "3d" ? "grid" : "3d")}
+        onClick={() => {
+          setViewMode(viewMode === "3d" ? "grid" : "3d");
+          if (!hasSeenGridTutorial) setHasSeenGridTutorial(true);
+        }}
         style={{
           position: "fixed",
           top: "1rem",
@@ -401,6 +406,42 @@ export function MoviesCanvas() {
       >
         {viewMode === "3d" ? <LayoutGrid size={18} /> : <Box size={18} />}
       </button>
+
+      {hasSeenTutorial && !hasSeenGridTutorial && viewMode === "3d" && (
+        <div
+          className="animate-bounce"
+          style={{
+            position: "fixed",
+            top: "4.25rem",
+            right: "10rem",
+            zIndex: 60,
+            background: "#d7a050",
+            color: "#000",
+            padding: "0.5rem 0.75rem",
+            borderRadius: "6px",
+            fontFamily: "monospace",
+            fontSize: "0.7rem",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "-6px",
+              right: "1.25rem",
+              transform: "translateX(50%)",
+              width: 0,
+              height: 0,
+              borderLeft: "6px solid transparent",
+              borderRight: "6px solid transparent",
+              borderBottom: "6px solid #d7a050",
+            }}
+          />
+          Click here for Grid View!
+        </div>
+      )}
 
       <button
         id="bookmark-btn"

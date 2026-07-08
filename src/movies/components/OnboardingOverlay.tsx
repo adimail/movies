@@ -21,20 +21,17 @@ export function OnboardingOverlay({ isMobile }: OnboardingOverlayProps) {
     };
 
     const onWheel = () => dismiss();
-    const onTouch = () => dismiss();
 
     window.addEventListener("wheel", onWheel, { once: true });
-    window.addEventListener("touchmove", onTouch, { once: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchmove", onTouch);
     };
   }, [setHasSeenTutorial]);
 
   const instructions = isMobile
     ? [
         { icon: "◈", text: "Use the D-Pad to steer" },
-        { icon: "⚡", text: "Hold Boost to fly forward" },
+        { icon: "⚡", text: "Hold FLY button to fly forward" },
         { icon: "◻", text: "Tap a card to inspect" },
       ]
     : [
@@ -127,9 +124,10 @@ export function OnboardingOverlay({ isMobile }: OnboardingOverlayProps) {
             textTransform: "uppercase",
           }}
         >
-          {isMobile ? "Boost to begin" : "Scroll to begin"}
+          {isMobile ? "Hold FLY to begin" : "Scroll to begin"}
         </div>
       </div>
     </div>
   );
 }
+
