@@ -144,7 +144,7 @@ export function MovieDetail({ movie, allMovies }: MovieDetailProps) {
         WebkitBackdropFilter: "blur(20px)",
         opacity: visible ? 1 : 0,
         transition: "opacity 0.32s ease",
-        cursor: isMobile ? "default" : "none",
+        cursor: "auto",
       }}
     >
       <motion.div
@@ -451,4 +451,3 @@ function ScoreRow({ label, value, isMobile }: { label: string; value: number; is
     </div>
   );
 }
-

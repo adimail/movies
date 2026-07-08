@@ -13,6 +13,7 @@ export interface Settings {
 }
 
 interface MovieStore {
+  viewMode: "3d" | "grid";
   scrollTarget: number;
   cameraTarget: { x: number; y: number; z: number };
   cursorWorld: { x: number; y: number; z: number };
@@ -35,6 +36,7 @@ interface MovieStore {
   voidLimitZ: number;
   bookmarkedMovieIds: string[];
 
+  setViewMode: (mode: "3d" | "grid") => void;
   setScrollTarget: (z: number) => void;
   setCameraTarget: (x: number, y: number, z: number) => void;
   nudgeCameraTarget: (dx: number, dy: number, dz: number) => void;
@@ -73,6 +75,7 @@ export const defaultSettings: Settings = {
 export const useMovieStore = create<MovieStore>()(
   persist(
     (set) => ({
+      viewMode: "3d",
       scrollTarget: 15,
       cameraTarget: { x: 0, y: 0, z: 15 },
       cursorWorld: { x: 0, y: 0, z: 0 },
@@ -95,6 +98,7 @@ export const useMovieStore = create<MovieStore>()(
       voidLimitZ: 15,
       bookmarkedMovieIds: [],
 
+      setViewMode: (mode) => set({ viewMode: mode }),
       setScrollTarget: (z) => set({ scrollTarget: z }),
       setCameraTarget: (x, y, z) => set({ cameraTarget: { x, y, z } }),
       nudgeCameraTarget: (dx, dy, dz) =>
@@ -143,6 +147,7 @@ export const useMovieStore = create<MovieStore>()(
     {
       name: "movies-universe-prefs",
       partialize: (state) => ({
+        viewMode: state.viewMode,
         settings: state.settings,
         hasSeenTutorial: state.hasSeenTutorial,
         bookmarkedMovieIds: state.bookmarkedMovieIds,
@@ -150,4 +155,3 @@ export const useMovieStore = create<MovieStore>()(
     }
   )
 );
-

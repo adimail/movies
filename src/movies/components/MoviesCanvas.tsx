@@ -17,7 +17,8 @@ import { MobileControls } from "./MobileControls";
 import { SearchBar } from "./SearchBar";
 import { OnboardingOverlay } from "./OnboardingOverlay";
 import { HoverTooltip } from "./HoverTooltip";
-import { Settings, HelpCircle, X, Bookmark } from "lucide-react";
+import { MovieGridView } from "./MovieGridView";
+import { Settings, HelpCircle, X, Bookmark, LayoutGrid, Box } from "lucide-react";
 import { SCORE_KEYS } from "../types";
 
 const DIRECTION_SCALE_X = 0.55;
@@ -26,6 +27,8 @@ const DIRECTION_SCALE_Y = 0.35;
 export function MoviesCanvas() {
   const { data, isLoading, isError } = useMovies();
   const {
+    viewMode,
+    setViewMode,
     selectedMovieId,
     setSelectedMovieId,
     isPanelExpanded,
@@ -195,6 +198,7 @@ export function MoviesCanvas() {
   const handleWheel = (e: React.WheelEvent) => {
     const state = useMovieStore.getState();
     if (
+      state.viewMode === "grid" ||
       state.selectedMovieId ||
       state.jumpTargetMovieId ||
       state.isSettingsOpen ||
@@ -244,6 +248,7 @@ export function MoviesCanvas() {
       if (!boostRef.current) return;
       const state = useMovieStore.getState();
       if (
+        state.viewMode === "grid" ||
         state.jumpTargetMovieId ||
         state.isSettingsOpen ||
         state.isHelpOpen ||
@@ -315,37 +320,71 @@ export function MoviesCanvas() {
     );
   }
 
+  const showSystemCursor = isMobile || viewMode === "grid" || !!(selectedMovieId || isSettingsOpen || isHelpOpen || isBookmarkDrawerOpen);
+
   return (
     <div
       onWheel={handleWheel}
       className="relative h-screen w-screen overflow-hidden bg-[#050505]"
       style={{
-        cursor: isMobile ? "default" : "none",
+        cursor: showSystemCursor ? "default" : "none",
         transition: "background-color 1s ease",
         backgroundColor: isPanelExpanded ? "#010101" : "#050505",
       }}
     >
-      {!isMobile && <CustomCursor />}
-      {!isMobile && <GenreCompass />}
-      <HoverTooltip movies={filteredMovies} />
+      {!showSystemCursor && <CustomCursor />}
+      {!isMobile && viewMode === "3d" && <GenreCompass />}
+      {viewMode === "3d" && <HoverTooltip movies={filteredMovies} />}
 
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: fadeIn ? (isPanelExpanded ? 0.1 : 1) : 0,
-          transition: fadeIn ? "opacity 1s ease" : "opacity 1.2s cubic-bezier(0.16,1,0.3,1)",
-          pointerEvents: isPanelExpanded ? "none" : "auto",
-        }}
-      >
-        {canvasReady && (
-          <Canvas camera={{ position: [0, 0, 30], fov: 60 }} gl={{ antialias: true }}>
-            <MoviesScene movies={filteredMovies} fadeIn={fadeIn} />
-          </Canvas>
-        )}
-      </div>
+      {viewMode === "3d" && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: fadeIn ? (isPanelExpanded ? 0.1 : 1) : 0,
+            transition: fadeIn ? "opacity 1s ease" : "opacity 1.2s cubic-bezier(0.16,1,0.3,1)",
+            pointerEvents: isPanelExpanded ? "none" : "auto",
+          }}
+        >
+          {canvasReady && (
+            <Canvas camera={{ position: [0, 0, 30], fov: 60 }} gl={{ antialias: true }}>
+              <MoviesScene movies={filteredMovies} fadeIn={fadeIn} />
+            </Canvas>
+          )}
+        </div>
+      )}
+
+      {viewMode === "grid" && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 10, background: "#050505" }}>
+          <MovieGridView movies={filteredMovies} />
+        </div>
+      )}
 
       <SearchBar allMovies={spatialMovies} filteredMovies={filteredMovies} />
+
+      <button
+        onClick={() => setViewMode(viewMode === "3d" ? "grid" : "3d")}
+        style={{
+          position: "fixed",
+          top: "1rem",
+          right: isMobile ? "7rem" : "10rem",
+          zIndex: 60,
+          width: "2.5rem",
+          height: "2.5rem",
+          borderRadius: "8px",
+          background: "rgba(0,0,0,0.6)",
+          border: "1px solid rgba(255,255,255,0.15)",
+          backdropFilter: "blur(12px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          cursor: "pointer",
+          transition: "all 0.2s ease",
+        }}
+      >
+        {viewMode === "3d" ? <LayoutGrid size={18} /> : <Box size={18} />}
+      </button>
 
       <button
         id="bookmark-btn"
@@ -450,17 +489,16 @@ export function MoviesCanvas() {
       {isSettingsOpen && <SettingsMenu />}
       {isHelpOpen && !isMobile && <HelpMenu />}
       {isBookmarkDrawerOpen && <BookmarkDrawer movies={spatialMovies} />}
-      {!isMobile && <TastePanel movies={filteredMovies} />}
+      {!isMobile && viewMode === "3d" && <TastePanel movies={filteredMovies} />}
       {selectedMovie && <MovieDetail movie={selectedMovie} allMovies={spatialMovies} />}
-      {isMobile && (
+      {isMobile && viewMode === "3d" && (
         <MobileControls
           onBoostStart={startBoost}
           onBoostEnd={stopBoost}
           onRandomJump={handleRandomJump}
         />
       )}
-      {!hasSeenTutorial && <OnboardingOverlay isMobile={isMobile} />}
+      {!hasSeenTutorial && viewMode === "3d" && <OnboardingOverlay isMobile={isMobile} />}
     </div>
   );
 }
-
