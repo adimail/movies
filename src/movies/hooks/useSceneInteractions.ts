@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useMovieStore } from "../store";
@@ -10,21 +10,22 @@ export function useSceneInteractions(
 ) {
   const { gl, camera } = useThree();
   const setJumpTargetMovieId = useMovieStore((s) => s.setJumpTargetMovieId);
+  const pointerMovedRef = useRef(false);
+  const targetsRef = useRef<{ mesh: THREE.Object3D; movieId: string }[]>([]);
+  const meshArrayRef = useRef<THREE.Object3D[]>([]);
 
   useEffect(() => {
-    const getTargets = () => {
-      const targets: { mesh: THREE.Object3D; movieId: string }[] = [];
-      if (!cards.current) return targets;
-
-      cards.current.forEach((entry) => {
-        if (entry.posterMesh) targets.push({ mesh: entry.posterMesh, movieId: entry.movieId });
-        targets.push({ mesh: entry.borderMesh, movieId: entry.movieId });
-      });
-      return targets;
+    const onPointerMove = () => {
+      pointerMovedRef.current = true;
     };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onPointerMove);
+  }, []);
 
-    const handleClick = (e: MouseEvent) => {
-      if (!containerRef.current) return;
+  useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      if (!containerRef.current || !cards.current) return;
+      if (e.button !== 0) return;
       const rect = gl.domElement.getBoundingClientRect();
       const mouse = new THREE.Vector2(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -32,20 +33,30 @@ export function useSceneInteractions(
       );
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, camera);
-      const targets = getTargets();
-      const hits = raycaster.intersectObjects(
-        targets.map((t) => t.mesh),
-        false
-      );
+
+      const meshes: THREE.Object3D[] = [];
+      const mapping = new Map<THREE.Object3D, string>();
+      cards.current.forEach((entry) => {
+        meshes.push(entry.borderMesh);
+        mapping.set(entry.borderMesh, entry.movieId);
+      });
+
+      const hits = raycaster.intersectObjects(meshes, false);
       if (hits.length > 0) {
-        const found = targets.find((t) => t.mesh === hits[0].object);
-        if (found) setJumpTargetMovieId(found.movieId, true);
+        const movieId = mapping.get(hits[0].object);
+        if (movieId) setJumpTargetMovieId(movieId, true);
+      } else {
+        const state = useMovieStore.getState();
+        if (state.jumpTargetMovieId || state.selectedMovieId) {
+          state.setJumpTargetMovieId(null);
+          state.setSelectedMovieId(null);
+        }
       }
     };
 
-    gl.domElement.addEventListener("click", handleClick);
+    gl.domElement.addEventListener("pointerdown", handlePointerDown);
     return () => {
-      gl.domElement.removeEventListener("click", handleClick);
+      gl.domElement.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [gl, camera, setJumpTargetMovieId, cards, containerRef]);
 
@@ -54,17 +65,22 @@ export function useSceneInteractions(
     const state = useMovieStore.getState();
     if (state.selectedMovieId || state.isMobile) return;
 
+    if (!pointerMovedRef.current) return;
+    pointerMovedRef.current = false;
+
     raycaster.setFromCamera(pointer, cam);
-    const targets: { mesh: THREE.Object3D; movieId: string }[] = [];
+
+    const targets = targetsRef.current;
+    const meshes = meshArrayRef.current;
+    targets.length = 0;
+    meshes.length = 0;
+
     cards.current.forEach((entry) => {
-      if (entry.posterMesh) targets.push({ mesh: entry.posterMesh, movieId: entry.movieId });
       targets.push({ mesh: entry.borderMesh, movieId: entry.movieId });
+      meshes.push(entry.borderMesh);
     });
 
-    const hits = raycaster.intersectObjects(
-      targets.map((t) => t.mesh),
-      false
-    );
+    const hits = raycaster.intersectObjects(meshes, false);
 
     if (hits.length > 0) {
       const found = targets.find((t) => t.mesh === hits[0].object);

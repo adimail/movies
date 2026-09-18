@@ -102,6 +102,15 @@ export function SearchBar({ allMovies, filteredMovies }: SearchBarProps) {
           setSelectedMovieId(movie.id);
         }
       }, 100);
+    } else if (viewMode === "shelf") {
+      setTimeout(() => {
+        const el = document.getElementById(`movie-shelf-item-${movie.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const trigger = el.querySelector('[data-header-toggle="true"]') as HTMLElement;
+          if (trigger) trigger.click();
+        }
+      }, 100);
     } else {
       setJumpTargetMovieId(movie.id, true);
     }
@@ -168,7 +177,7 @@ export function SearchBar({ allMovies, filteredMovies }: SearchBarProps) {
           style={{
             position: "fixed",
             top: "1rem",
-            left: "1rem",
+            left: "4rem",
             zIndex: 60,
             width: "2.5rem",
             height: "2.5rem",
@@ -302,7 +311,7 @@ export function SearchBar({ allMovies, filteredMovies }: SearchBarProps) {
             )}
           </div>
 
-            {open && query.length > 1 && (
+          {open && query.length > 1 && (
             <div
               style={{
                 background: "rgba(10,10,10,0.95)",
@@ -398,3 +407,4 @@ export function SearchBar({ allMovies, filteredMovies }: SearchBarProps) {
     </>
   );
 }
+

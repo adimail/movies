@@ -1,9 +1,7 @@
-import { MoviesCanvas } from "./movies/components/MoviesCanvas";
+import { RouterProvider } from "@tanstack/react-router";
+import { router } from "./router";
 
 export default function App() {
-  return (
-    <main className="w-screen h-screen overflow-hidden bg-black text-white">
-      <MoviesCanvas />
-    </main>
-  );
+  return <RouterProvider router={router} />;
 }
+

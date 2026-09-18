@@ -43,6 +43,8 @@ function createTextFallback(title: string): THREE.Texture {
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
   return tex;
 }
 
@@ -55,15 +57,18 @@ export function loadTexture(url: string, title: string, onLoad: (t: THREE.Textur
     url,
     (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
+      tex.generateMipmaps = false;
+      tex.minFilter = THREE.LinearFilter;
       textureCache.set(url, tex);
       onLoad(tex);
     },
     undefined,
     () => {
       const fallbackTex = createTextFallback(title);
+      fallbackTex.generateMipmaps = false;
+      fallbackTex.minFilter = THREE.LinearFilter;
       textureCache.set(url, fallbackTex);
       onLoad(fallbackTex);
     }
   );
 }
-

@@ -19,10 +19,22 @@ export function TastePanel({ movies }: TastePanelProps) {
     useMovieStore();
   const [cursorVector, setCursorVector] = useState<MovieScores | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const lastUpdateRef = useRef(0);
 
   useEffect(() => {
     const sourceMovies = visibleMovies.length > 0 ? visibleMovies : movies;
     if (!sourceMovies.length) return;
+
+    const now = performance.now();
+    if (now - lastUpdateRef.current < 90) {
+      const timeout = setTimeout(() => {
+        setCursorVector(getTasteVectorFromCursor(cursorNDC, sourceMovies, 7));
+        lastUpdateRef.current = performance.now();
+      }, 90 - (now - lastUpdateRef.current));
+      return () => clearTimeout(timeout);
+    }
+
+    lastUpdateRef.current = now;
     setCursorVector(getTasteVectorFromCursor(cursorNDC, sourceMovies, 7));
   }, [cursorNDC, visibleMovies, movies]);
 
@@ -307,4 +319,3 @@ function ScoreRow({
     </div>
   );
 }
-

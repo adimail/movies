@@ -4,6 +4,11 @@ import { useMovieStore } from "../store";
 import { CardEntry } from "../types";
 import { PARALLAX_RANGE } from "../constants";
 
+const _currentLookAt = new THREE.Vector3();
+const _desiredLookAt = new THREE.Vector3();
+const _blended = new THREE.Vector3();
+const _targetPos = new THREE.Vector3();
+
 export function useCameraMotion(
   cards: React.RefObject<Map<string, CardEntry>>,
   entryAnimDone: React.RefObject<boolean>,
@@ -54,7 +59,7 @@ export function useCameraMotion(
             Math.pow(destZ - cam.position.z, 2)
         );
 
-        if (distToCam < 1.5) {
+        if (distToCam < 2.5 || (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(dz) < 0.5)) {
           if (state.openDetailsOnJump) {
             state.setSelectedMovieId(jumpId);
           }
@@ -74,30 +79,27 @@ export function useCameraMotion(
       cam.position.z += target.z - cam.position.z;
 
       if (!s.reduceMotion) {
-        const currentLookAt = new THREE.Vector3();
-        cam.getWorldDirection(currentLookAt);
-
-        let desiredLookAt: THREE.Vector3;
+        cam.getWorldDirection(_currentLookAt);
 
         if (state.jumpTargetMovieId && jumpTargetCard) {
-          desiredLookAt = new THREE.Vector3(
-            jumpTargetCard.group.position.x,
-            jumpTargetCard.group.position.y,
-            jumpTargetCard.group.position.z
-          )
+          _desiredLookAt
+            .set(
+              jumpTargetCard.group.position.x,
+              jumpTargetCard.group.position.y,
+              jumpTargetCard.group.position.z
+            )
             .sub(cam.position)
             .normalize();
         } else {
           const lookAtX = target.x + cursor.x * 8 * motionMultiplier;
           const lookAtY = target.y + cursor.y * 8 * motionMultiplier;
           const lookAtZ = target.z - 20;
-          desiredLookAt = new THREE.Vector3(lookAtX, lookAtY, lookAtZ)
-            .sub(cam.position)
-            .normalize();
+          _desiredLookAt.set(lookAtX, lookAtY, lookAtZ).sub(cam.position).normalize();
         }
 
-        const blended = currentLookAt.lerp(desiredLookAt, 0.05).normalize();
-        cam.lookAt(cam.position.clone().add(blended));
+        _blended.copy(_currentLookAt).lerp(_desiredLookAt, 0.05).normalize();
+        _targetPos.copy(cam.position).add(_blended);
+        cam.lookAt(_targetPos);
       } else if (state.jumpTargetMovieId && jumpTargetCard) {
         cam.lookAt(jumpTargetCard.group.position);
       }

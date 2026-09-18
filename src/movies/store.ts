@@ -13,7 +13,7 @@ export interface Settings {
 }
 
 interface MovieStore {
-  viewMode: "3d" | "grid";
+  viewMode: "3d" | "grid" | "shelf";
   scrollTarget: number;
   cameraTarget: { x: number; y: number; z: number };
   cursorWorld: { x: number; y: number; z: number };
@@ -37,7 +37,7 @@ interface MovieStore {
   voidLimitZ: number;
   bookmarkedMovieIds: string[];
 
-  setViewMode: (mode: "3d" | "grid") => void;
+  setViewMode: (mode: "3d" | "grid" | "shelf") => void;
   setScrollTarget: (z: number) => void;
   setCameraTarget: (x: number, y: number, z: number) => void;
   nudgeCameraTarget: (dx: number, dy: number, dz: number) => void;

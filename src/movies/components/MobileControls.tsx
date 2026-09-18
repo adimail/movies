@@ -47,6 +47,12 @@ export function MobileControls({ onBoostStart, onBoostEnd, onRandomJump }: Mobil
   const pressedRef = useRef({ up: false, down: false, left: false, right: false });
   const rafRef = useRef<number>(0);
 
+  const unlock = () => {
+    const state = useMovieStore.getState();
+    if (state.jumpTargetMovieId) state.setJumpTargetMovieId(null);
+    if (state.selectedMovieId) state.setSelectedMovieId(null);
+  };
+
   useEffect(() => {
     const loop = () => {
       const p = pressedRef.current;
@@ -69,6 +75,7 @@ export function MobileControls({ onBoostStart, onBoostEnd, onRandomJump }: Mobil
   }, [setCursorNDC]);
 
   const press = (dir: keyof typeof pressedRef.current) => {
+    unlock();
     pressedRef.current[dir] = true;
   };
 
@@ -77,6 +84,7 @@ export function MobileControls({ onBoostStart, onBoostEnd, onRandomJump }: Mobil
   };
 
   const center = () => {
+    unlock();
     setCursorNDC(0, 0);
   };
 
@@ -172,6 +180,7 @@ export function MobileControls({ onBoostStart, onBoostEnd, onRandomJump }: Mobil
           onContextMenu={(e) => e.preventDefault()}
           onPointerDown={(e) => {
             e.preventDefault();
+            unlock();
             onBoostStart();
           }}
           onPointerUp={(e) => {
@@ -208,6 +217,7 @@ export function MobileControls({ onBoostStart, onBoostEnd, onRandomJump }: Mobil
           onContextMenu={(e) => e.preventDefault()}
           onPointerDown={(e) => {
             e.preventDefault();
+            unlock();
             onRandomJump();
           }}
         >
